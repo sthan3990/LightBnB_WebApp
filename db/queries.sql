@@ -1,0 +1,7 @@
+-- getUserWithEmail
+
+-- getUserWithId
+
+-- getAllReservations
+
+-- getAllProperties
