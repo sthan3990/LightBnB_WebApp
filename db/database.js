@@ -24,7 +24,7 @@ const pool = new Pool({
 const getUserWithEmail = function (email) {
   return pool
   .query(`SELECT * FROM users 
-          WHERE email EQUALS $1`, [email])
+          WHERE email = $1`, [email])
   .then((result) => {
     console.log(result.rows);
     return result.rows;
@@ -44,7 +44,7 @@ const getUserWithId = function (id) {
   .query(`SELECT * FROM users 
           WHERE id EQUALS $1`, [id])
   .then((result) => {
-    return result.rows;
+    return result.rows[0];
   })
   .catch((err) => {
     console.log(err.message);
@@ -78,8 +78,14 @@ const addUser = function (user) {
 /// Reservations
 const getAllReservations = function (guest_id, limit = 10) {
   return pool
-  .query(`SELECT * FROM reservations
-          WHERE guest_id EQUALS %1
+  .query(`SELECT reservations.id, properties.title, properties.cost_per_night, 
+          reservations.start_date, avg(rating) as average_rating
+          FROM reservations
+          JOIN properties ON reservations.property_id = properties.id
+          JOIN property_reviews ON properties.id = property_reviews.property_id
+          WHERE reservations.guest_id = $1
+          GROUP BY properties.id, reservations.id
+          ORDER BY reservations.start_date
           LIMIT $2`, [guest_id,limit])
   .then((result) => {
     console.log(result.rows);
